@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.project.formhub.domain.User;
+import com.project.formhub.domain.response.ResCreateUserDTO;
 import com.project.formhub.repository.UserRepository;
 
 @Service
@@ -32,7 +33,30 @@ public class UserService {
         return null;
     }
 
+    public User handleGetUserByUserName(String userName) {
+        return this.userRepository.findByEmail(userName);
+    }
+
     public void handleDeleteUser(long id) {
         this.userRepository.deleteById(id);
+    }
+
+    public void updateUserToken(String token, String email) {
+        User currentUser = this.handleGetUserByUserName(email);
+
+        if (currentUser != null) {
+            currentUser.setRefreshToken(token);
+            this.userRepository.save(currentUser);
+        }
+
+    }
+
+    public ResCreateUserDTO convertToResCreateUserDTO(User user) {
+        ResCreateUserDTO resCreateUserDTO = new ResCreateUserDTO();
+        resCreateUserDTO.setId(user.getId());
+        resCreateUserDTO.setName(user.getName());
+        resCreateUserDTO.setEmail(user.getEmail());
+        resCreateUserDTO.setCreatedAt(user.getCreatedAt());
+        return resCreateUserDTO;
     }
 }
