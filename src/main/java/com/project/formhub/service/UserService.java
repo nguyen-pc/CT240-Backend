@@ -59,4 +59,8 @@ public class UserService {
         resCreateUserDTO.setCreatedAt(user.getCreatedAt());
         return resCreateUserDTO;
     }
+
+    public User getUserByRefreshTokenAndEmail(String token, String email) {
+        return this.userRepository.findByRefreshTokenAndEmail(token, email);
+    }
 }

@@ -22,6 +22,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -110,6 +112,67 @@ public class AuthController {
         postManUser.setPassword(hasPassword);
         User user = this.userService.handleCreateUser(postManUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(user));
+    }
+
+    @GetMapping("/auth/account")
+    public ResponseEntity<RestLoginDTO.UserGetAccount> getAccount() {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : " ";
+
+        User currentUserDB = this.userService.handleGetUserByUserName(email);
+        RestLoginDTO.UserLogin userLogin = new RestLoginDTO.UserLogin();
+        RestLoginDTO.UserGetAccount userGetAccount = new RestLoginDTO.UserGetAccount();
+
+        if (currentUserDB != null) {
+            userLogin.setId(currentUserDB.getId());
+            userLogin.setEmail(currentUserDB.getEmail());
+            userLogin.setName(currentUserDB.getName());
+
+            // set Role
+            userGetAccount.setUser(userLogin);
+        }
+        return ResponseEntity.ok().body(userGetAccount);
+    }
+
+    @GetMapping("/auth/refresh")
+    public ResponseEntity<RestLoginDTO> getRefreshToken(@CookieValue(name = "refresh_token") String refresh_token)
+            throws IdInvalidException {
+        // check valid
+        Jwt decodedToken = this.securityUtil.checkValidRefreshToken(refresh_token);
+        String email = decodedToken.getSubject();
+
+        // check user by token and email
+        User currentUser = this.userService.getUserByRefreshTokenAndEmail(refresh_token, email);
+
+        if (currentUser == null) {
+            throw new IdInvalidException("Refresh token khong hop le");
+        }
+
+        // issue new token/set refresh token as cookies
+        RestLoginDTO res = new RestLoginDTO();
+        User currentUserDB = this.userService.handleGetUserByUserName(email);
+
+        if (currentUserDB != null) {
+            RestLoginDTO.UserLogin userLogin = new RestLoginDTO.UserLogin(currentUserDB.getId(),
+                    currentUserDB.getEmail(), currentUserDB.getName());
+            res.setUser(userLogin);
+        }
+
+        // Create access token
+        String access_token = this.securityUtil.createAccessToken(email, res);
+        res.setAccessToken(access_token);
+
+        // Create refresh token
+        String new_refresh_token = this.securityUtil.createRefreshToken(email, res);
+
+        // update user
+        this.userService.updateUserToken(new_refresh_token, email);
+
+        // set cookie
+        ResponseCookie resCookie = ResponseCookie.from("refresh_token", new_refresh_token).httpOnly(true).secure(true)
+                .path("/")
+                .maxAge(refreshTokenExpiration).build();
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, resCookie.toString()).body(res);
     }
 
     @GetMapping("/path")
