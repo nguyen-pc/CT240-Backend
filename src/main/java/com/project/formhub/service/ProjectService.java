@@ -1,21 +1,26 @@
 package com.project.formhub.service;
 
 import java.lang.StackWalker.Option;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.project.formhub.domain.Project;
 import com.project.formhub.domain.User;
+import com.project.formhub.domain.response.project.ProjectDTO;
 import com.project.formhub.domain.response.project.ResCreateProjectDTO;
 import com.project.formhub.domain.response.project.ResUpdateProject;
 import com.project.formhub.repository.ProjectRepository;
+import com.project.formhub.util.SecurityUtil;
 
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final UserService userService;
 
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(ProjectRepository projectRepository, UserService userService) {
+        this.userService = userService;
         this.projectRepository = projectRepository;
     }
 
@@ -66,5 +71,15 @@ public class ProjectService {
         Optional<Project> projectOptional = this.projectRepository.findById(projectId);
 
         projectRepository.deleteById(projectId);
+    }
+
+    public List<Project> handleGetProjects() {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() == true
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+
+        User currentUser = userService.handleGetUserByUserName(email);
+
+        return projectRepository.findByUserId(currentUser.getId());
     }
 }

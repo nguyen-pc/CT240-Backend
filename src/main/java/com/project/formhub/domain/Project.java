@@ -2,6 +2,7 @@ package com.project.formhub.domain;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.formhub.util.SecurityUtil;
 
 import jakarta.annotation.Generated;
@@ -38,6 +39,7 @@ public class Project {
     private String updatedBy;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "user_id")
     private User user;
 
