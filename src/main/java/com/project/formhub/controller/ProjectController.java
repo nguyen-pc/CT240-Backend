@@ -73,6 +73,21 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(resProjectDTO);
     }
 
+    @GetMapping("/project/{id}")
+    public ResponseEntity<ProjectDTO> getProjectById(@PathVariable("id") long id) {
+        Optional<Project> project = projectService.handleGetProjectById(id);
+        if (project.isPresent()) {
+            ProjectDTO projectDTO = new ProjectDTO();
+            projectDTO.setProjectId(project.get().getProjectId());
+            projectDTO.setProjectName(project.get().getProjectName());
+            projectDTO.setDescription(project.get().getDescription());
+            projectDTO.setCreatedAt(project.get().getCreatedAt());
+            projectDTO.setCreatedBy(project.get().getCreatedBy());
+            return ResponseEntity.ok(projectDTO);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @DeleteMapping("/project/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable("id") long id) {
         this.projectService.handleDeleteProject(id);

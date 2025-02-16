@@ -21,6 +21,7 @@ public class ProjectService {
 
     public ProjectService(ProjectRepository projectRepository, UserService userService) {
         this.userService = userService;
+
         this.projectRepository = projectRepository;
     }
 
@@ -81,5 +82,9 @@ public class ProjectService {
         User currentUser = userService.handleGetUserByUserName(email);
 
         return projectRepository.findByUserId(currentUser.getId());
+    }
+
+    public Optional<Project> handleGetProjectById(long projectId) {
+        return projectRepository.findById(projectId);
     }
 }

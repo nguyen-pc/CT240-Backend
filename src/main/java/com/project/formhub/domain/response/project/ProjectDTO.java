@@ -14,6 +14,9 @@ public class ProjectDTO {
     private String createdBy;
     private String updatedBy;
 
+    public ProjectDTO() {
+    }
+
     public ProjectDTO(Long projectId, String projectName, String description, Instant createdAt, Instant updatedAt,
             String createdBy, String updatedBy) {
         this.projectId = projectId;
