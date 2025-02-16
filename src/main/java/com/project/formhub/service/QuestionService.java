@@ -11,18 +11,21 @@ import com.project.formhub.domain.Survey;
 import com.project.formhub.domain.request.ReqQuestionDTO;
 import com.project.formhub.repository.ChoiceRepository;
 import com.project.formhub.repository.QuestionRepository;
+import com.project.formhub.repository.SurveyRepository;
 
 @Service
 public class QuestionService {
     private final QuestionRepository questionRepository;
     private final SurveyService surveyService;
     private final ChoiceRepository choiceRepository;
+    private final SurveyRepository surveyRepository;
 
     public QuestionService(QuestionRepository questionRepository, SurveyService surveyService,
-            ChoiceRepository choiceRepository) {
+            ChoiceRepository choiceRepository, SurveyRepository surveyRepository) {
         this.questionRepository = questionRepository;
         this.surveyService = surveyService;
         this.choiceRepository = choiceRepository;
+        this.surveyRepository = surveyRepository;
     }
 
     public Question createQuestion(ReqQuestionDTO question, long surveyId) {
@@ -51,6 +54,45 @@ public class QuestionService {
         }
 
         return resQuestion;
+    }
+
+    public Question updateQuestion(long surveyId, long questionId, ReqQuestionDTO request) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy câu hỏi"));
+
+        Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new RuntimeException("Form không tồn tại"));
+        // Cập nhật dữ liệu
+        question.setSurvey(survey);
+        question.setQuestionName(request.getQuestionText());
+        question.setQuestionType(request.getQuestionType());
+
+        // Xóa tất cả lựa chọn cũ (nếu có)
+        if (request.getQuestionType() == Question.QuestionType.MULTIPLE_CHOICE ||
+                request.getQuestionType() == Question.QuestionType.CHECKBOX ||
+                request.getQuestionType() == Question.QuestionType.DROPDOWN) {
+
+            // delete choice
+            // choiceRepository.deleteByQuestion_Id(questionId);
+
+            List<Choice> choices = request.getChoices().stream().map(choiceDTO -> {
+                Choice choice = new Choice();
+                choice.setQuestion(question);
+                choice.setChoiceText(choiceDTO.getChoiceText());
+                return choice;
+            }).collect(Collectors.toList());
+
+            choiceRepository.saveAll(choices);
+        }
+
+        return questionRepository.save(question);
+    }
+
+    public void deleteQuestion(long questionId) {
+        Question question = questionRepository.findById(questionId).orElseThrow();
+
+        // choiceRepository.deleteByQuestionId(questionId);
+        questionRepository.delete(question);
     }
 
 }
