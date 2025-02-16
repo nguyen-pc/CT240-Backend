@@ -75,7 +75,7 @@ public class FileController {
             throw new StorageException("File not found or is a directory");
         }
 
-        // download file
+        // download file from storage
         InputStreamResource resource = this.fileService.getResource(fileName, folder);
 
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
