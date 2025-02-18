@@ -37,7 +37,6 @@ public class Survey {
 
     private String createdBy;
     private String updatedBy;
-
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "project_id")

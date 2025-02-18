@@ -43,7 +43,7 @@ public class Question {
     private QuestionType questionType;
 
     @ManyToOne
-    // @JsonIgnore
+    @JsonIgnore
     @JoinColumn(name = "survey_id")
     private Survey survey;
 
