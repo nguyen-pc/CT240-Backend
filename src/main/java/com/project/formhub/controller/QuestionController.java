@@ -1,5 +1,7 @@
 package com.project.formhub.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -49,4 +51,11 @@ public class QuestionController {
         questionService.deleteQuestion(questionId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @GetMapping("/project/{projectId}/survey/{surveyId}/question")
+    public ResponseEntity<List<Question>> getAllQuestions(@PathVariable("surveyId") long surveyId) {
+
+        return ResponseEntity.ok(questionService.getAllQuestionBySurveyId(surveyId));
+    }
+
 }

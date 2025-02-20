@@ -10,5 +10,5 @@ import com.project.formhub.domain.Response;
 
 @Repository
 public interface ResponseRepository extends JpaRepository<Response, Long>, JpaSpecificationExecutor<Response> {
-    // List<Response> findByForm_Id(Long formId);
+    List<Response> findBySurvey_SurveyId(Long surveyId);
 }

@@ -1,5 +1,7 @@
 package com.project.formhub.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,12 +25,20 @@ public class ResponseController {
     }
 
     @PostMapping("/project/{projectId}/survey/{surveyId}/response")
-    public ResponseEntity<Response> getResponses(@PathVariable("surveyId") long surveyId,
+    public ResponseEntity<Response> postResponses(@PathVariable("surveyId") long surveyId,
             @Valid @RequestBody ReqResponseDTO request) {
 
         Response resSurvey = responseService.saveResponse(surveyId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(resSurvey);
+    }
+
+    @GetMapping("/project/{projectId}/survey/{surveyId}/response")
+    public ResponseEntity<List<Response>> getResponses(@PathVariable("surveyId") long surveyId) {
+
+        List<Response> resSurvey = responseService.getResponseBySurveyId(surveyId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(resSurvey);
     }
 
 }

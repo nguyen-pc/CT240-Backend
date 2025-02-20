@@ -33,7 +33,7 @@ public class ResponseService {
         this.answerService = answerService;
     }
 
-    // @Transactional
+    @Transactional
     public Response saveResponse(Long surveyId, ReqResponseDTO request) {
         // Neu muon dang nhap thong tin tai khoan nguoi dung
         Survey survey = surveyRepository.findById(surveyId)
@@ -59,6 +59,10 @@ public class ResponseService {
 
         return responseRepository.save(response);
 
+    }
+
+    public List<Response> getResponseBySurveyId(Long surveyId) {
+        return responseRepository.findBySurvey_SurveyId(surveyId);
     }
 
 }

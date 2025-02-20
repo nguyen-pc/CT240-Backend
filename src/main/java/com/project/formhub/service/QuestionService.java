@@ -95,4 +95,8 @@ public class QuestionService {
         questionRepository.delete(question);
     }
 
+    public List<Question> getAllQuestionBySurveyId(long surveyId) {
+        return questionRepository.findBySurvey_SurveyId(surveyId);
+    }
+
 }
