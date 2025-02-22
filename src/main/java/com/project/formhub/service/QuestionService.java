@@ -12,7 +12,7 @@ import java.util.List;
 public class QuestionService {
     private final QuestionRepository questionRepository;
 
-    public QuestionService(QuestionRepository questionRepository, ChoiceRepository choiceRepository) {
+    public QuestionService(QuestionRepository questionRepository) {
         this.questionRepository = questionRepository;
     }
 
