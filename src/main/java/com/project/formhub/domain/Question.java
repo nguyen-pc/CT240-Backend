@@ -75,6 +75,10 @@ public class Question {
     }
 
     public enum QuestionType {
-        TEXT, MULTIPLE_CHOICE, CHECKBOX, DROPDOWN, FILE_UPLOAD
+        TEXT, MULTIPLE_CHOICE, CHECKBOX, DROPDOWN, FILE_UPLOAD;
+
+        public boolean isMultipleOrCheckbox() {
+            return this == MULTIPLE_CHOICE || this == CHECKBOX;
+        }
     }
 }
