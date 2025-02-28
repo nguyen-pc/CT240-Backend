@@ -1,17 +1,20 @@
 package com.project.formhub.domain;
 
 import java.time.Instant;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.formhub.util.SecurityUtil;
 
 import jakarta.annotation.Generated;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -37,6 +40,9 @@ public class Project {
 
     private String createdBy;
     private String updatedBy;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    private List<Survey> surveys;
 
     @ManyToOne
     @JsonIgnore
