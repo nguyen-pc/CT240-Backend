@@ -32,6 +32,9 @@ public class FileController {
     @Value("${formhub.upload-file.base-uri}")
     private String baseURI;
 
+    @Value("${formhub.upload-file.base-url}")
+    private String baseURL;
+
     public FileController(FileService fileService) {
         this.fileService = fileService;
     }
@@ -81,5 +84,15 @@ public class FileController {
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .contentLength(fileLength).contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+
+    @GetMapping("/files/list")
+    public ResponseEntity<List<String>> listFiles(@RequestParam("folder") String folder) throws StorageException {
+        if (folder == null || folder.isEmpty()) {
+            throw new StorageException("Folder name is required.");
+        }
+
+        List<String> files = fileService.listFiles(folder);
+        return ResponseEntity.ok(files);
     }
 }

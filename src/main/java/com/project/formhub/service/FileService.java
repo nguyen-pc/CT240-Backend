@@ -11,16 +11,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.stream.Collectors;
+
+import com.project.formhub.util.error.StorageException;
+
 @Service
 public class FileService {
     @Value("${formhub.upload-file.base-uri}")
     private String baseURI;
+
+    @Value("${formhub.upload-file.base-url}")
+    private String baseURL;
 
     public void createUploadFolder(String folder) throws URISyntaxException {
         URI uri = new URI(folder);
@@ -81,4 +92,32 @@ public class FileService {
             file.delete();
         }
     }
+
+    public List<String> listFiles(String folder) throws StorageException {
+        if (folder.contains(",")) {
+            throw new StorageException("Invalid folder name: " + folder);
+        }
+
+        String folderPath = Paths.get(baseURL, folder).toString();
+        System.out.println("Checking folder path: " + folderPath); // Debug
+
+        File dir = new File(folderPath);
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new StorageException("Folder does not exist or is not a directory: " + folderPath);
+        }
+
+        File[] files = dir.listFiles();
+        List<String> fileNames = new ArrayList<>();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    fileNames.add(file.getName());
+                }
+            }
+        }
+
+        return fileNames;
+    }
+
 }
