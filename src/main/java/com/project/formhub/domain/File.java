@@ -32,7 +32,6 @@ public class File {
 
     private String fileType;
     private long fileSize;
-    private String fileUrl;
     private Instant createdAt;
     private Instant updatedAt;
 

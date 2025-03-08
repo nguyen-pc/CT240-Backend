@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,15 +24,26 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.stream.Collectors;
 
+import com.project.formhub.domain.Project;
+import com.project.formhub.domain.Survey;
+import com.project.formhub.repository.FileRepository;
+import com.project.formhub.util.SecurityUtil;
 import com.project.formhub.util.error.StorageException;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class FileService {
+    private final FileRepository fileRepository;
     @Value("${formhub.upload-file.base-uri}")
     private String baseURI;
 
     @Value("${formhub.upload-file.base-url}")
     private String baseURL;
+
+    public FileService(FileRepository fileRepository) {
+        this.fileRepository = fileRepository;
+    }
 
     public void createUploadFolder(String folder) throws URISyntaxException {
         URI uri = new URI(folder);
@@ -49,7 +61,7 @@ public class FileService {
         }
     }
 
-    public String store(MultipartFile file, String folder) throws URISyntaxException, IOException {
+    public String store(MultipartFile file, String folder, Survey survey) throws URISyntaxException, IOException {
         // create unique filename
         String finalName = System.currentTimeMillis() + "-" + file.getOriginalFilename();
         URI uri = new URI(baseURI + folder + "/" + finalName);
@@ -57,6 +69,16 @@ public class FileService {
         try (InputStream inputStream = file.getInputStream()) {
             Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
         }
+        // Lưu vào database
+        com.project.formhub.domain.File newFile = new com.project.formhub.domain.File();
+        newFile.setFileName(finalName);
+        newFile.setFileType(file.getContentType());
+        newFile.setFileSize(file.getSize());
+        newFile.setSurvey(survey);
+        newFile.setCreatedAt(Instant.now());
+        newFile.setCreatedBy(SecurityUtil.getCurrentUserLogin().orElse(""));
+
+        fileRepository.save(newFile);
         return finalName;
     }
 
@@ -118,6 +140,31 @@ public class FileService {
         }
 
         return fileNames;
+    }
+
+    // public List<String> getFilesBySurveyId(Long surveyId) {
+    // List<com.project.formhub.domain.File> files =
+    // fileRepository.findBySurvey_SurveyId(surveyId);
+    // return
+    // files.stream().map(com.project.formhub.domain.File::getFileName).collect(Collectors.toList());
+    // }
+
+    public List<com.project.formhub.domain.File> getFilesBySurveyId(Long surveyId) {
+        List<com.project.formhub.domain.File> files = fileRepository.findBySurvey_SurveyId(surveyId);
+        if (files == null) {
+            return null;
+        }
+        return files;
+    }
+
+    @Transactional
+    public void deleteFileRecord(com.project.formhub.domain.File file) {
+        fileRepository.delete(file);
+    }
+
+    public com.project.formhub.domain.File getFileRecord(String fileName, String folder) {
+        return fileRepository.findByFileName(fileName)
+                .orElse(null);
     }
 
 }
