@@ -38,6 +38,8 @@ public class Question {
     @NotBlank(message = "Question name is required")
     private String questionName;
 
+    private boolean required;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private QuestionType questionType;

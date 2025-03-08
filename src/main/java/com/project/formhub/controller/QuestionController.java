@@ -40,8 +40,10 @@ public class QuestionController {
 
     // Update a question with idQuestion
     @PutMapping("/project/{projectId}/survey/{surveyId}/question/{questionId}")
-    public ResponseEntity<?> updateQuestion(@RequestBody Question resQuestion, @PathVariable long projectId,
-            @PathVariable long surveyId, @PathVariable long questionId) {
+    public ResponseEntity<?> updateQuestion(@RequestBody Question resQuestion,
+            @PathVariable("projectId") long projectId,
+            @PathVariable("surveyId") long surveyId,
+            @PathVariable("questionId") long questionId) {
         try {
             Question updatedQuestion = this.questionService.updateQuestion(questionId, resQuestion);
             return ResponseEntity.ok(updatedQuestion);
@@ -54,8 +56,9 @@ public class QuestionController {
 
     // Get a question with id
     @GetMapping("/project/{projectId}/survey/{surveyId}/question/{questionId}")
-    public ResponseEntity<?> getQuestion(@PathVariable long projectId, @PathVariable long surveyId,
-            @PathVariable long questionId) {
+    public ResponseEntity<?> getQuestion(@PathVariable("projectId") long projectId,
+            @PathVariable("surveyId") long surveyId,
+            @PathVariable("questionId") long questionId) {
         QuestionDTO dbQuestion = this.questionService.getQuestionDTO(questionId);
         if (dbQuestion == null)
             return ResponseEntity.badRequest().body("Could not find question with id: " + questionId);
@@ -65,8 +68,9 @@ public class QuestionController {
 
     // Delete a question with id
     @DeleteMapping("/project/{projectId}/survey/{surveyId}/question/{questionId}")
-    public ResponseEntity<?> deleteQuestion(@PathVariable long projectId, @PathVariable long surveyId,
-            @PathVariable long questionId) {
+    public ResponseEntity<?> deleteQuestion(@PathVariable("projectId") long projectId,
+            @PathVariable("surveyId") long surveyId,
+            @PathVariable("questionId") long questionId) {
         try {
             this.questionService.deleteQuestion(questionId);
             return ResponseEntity.ok("Deleted successfully question with id: " + questionId);
