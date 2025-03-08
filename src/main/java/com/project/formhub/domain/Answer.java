@@ -1,17 +1,11 @@
 package com.project.formhub.domain;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,9 +30,13 @@ public class Answer {
     @Column(name = "answer_text", columnDefinition = "TEXT")
     private String answerText;
 
-    @ManyToOne
-    @JoinColumn(name = "choice_id", nullable = true) // Chỉ áp dụng cho câu hỏi trắc nghiệm
-    private Choice choice;
+    @ManyToMany
+    @JoinTable(
+            name = "answer_choices",
+            joinColumns = @JoinColumn(name = "answer_id"),
+            inverseJoinColumns = @JoinColumn(name = "choice_id")
+    )
+    private List<Choice> choices;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

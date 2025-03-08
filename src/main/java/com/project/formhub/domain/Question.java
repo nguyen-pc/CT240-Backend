@@ -22,6 +22,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,6 +42,10 @@ public class Question {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private QuestionType questionType;
+
+    @Column(nullable = false)
+    @NotNull(message = "isRequired attribute is required")
+    private Boolean isRequired = false;
 
     @ManyToOne
     @JsonIgnore
@@ -79,6 +84,14 @@ public class Question {
 
         public boolean isMultipleOrCheckbox() {
             return this == MULTIPLE_CHOICE || this == CHECKBOX;
+        }
+
+        public boolean isMultipleChoice(){
+            return this == MULTIPLE_CHOICE;
+        }
+
+        public boolean isCheckbox(){
+            return this == CHECKBOX;
         }
     }
 }
