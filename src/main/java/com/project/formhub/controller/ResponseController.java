@@ -16,8 +16,9 @@ public class ResponseController {
         this.responseService = responseService;
     }
 
-    @PostMapping("project/{projectId}/survey/{surveyId}/response")
-    public ResponseEntity<?> createResponse(@PathVariable long projectId, @PathVariable long surveyId, @RequestBody Response response) {
+
+    @PostMapping("/survey/{surveyId}/response")
+    public ResponseEntity<?> createResponse(@RequestBody Response response, @PathVariable("surveyId") long surveyId) {
         try {
             Response savedResponse = this.responseService.createResponse(projectId, surveyId, response);
             return ResponseEntity.ok(savedResponse);
@@ -28,8 +29,10 @@ public class ResponseController {
         }
     }
 
-    @GetMapping("project/{projectId}/survey/{surveyId}/response/{responseId}")
-    public ResponseEntity<?> getResponse(@PathVariable long projectId, @PathVariable long surveyId, @PathVariable long responseId) {
+
+    @GetMapping("/survey/{surveyId}/response/{responseId}")
+    public ResponseEntity<?> getResponse(@PathVariable("surveyId") long surveyId,
+            @PathVariable("responseId") long responseId) {
         try {
             Response dbResponse = this.responseService.getResponse(projectId, surveyId, responseId);
             return ResponseEntity.ok(dbResponse);

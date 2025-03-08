@@ -1,5 +1,6 @@
 package com.project.formhub.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -62,5 +63,30 @@ public class UserService {
 
     public User getUserByRefreshTokenAndEmail(String token, String email) {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
+    }
+
+    public List<User> fetchAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User handleUpdateUser(User user) {
+        // Check if the user exists in the database
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null and must have a valid ID");
+        }
+
+        // Find the user by ID
+        User existingUser = userRepository.findById(user.getId()).orElse(null);
+        if (existingUser == null) {
+            throw new IllegalArgumentException("User with id = " + user.getId() + " does not exist");
+        }
+
+        // Update the user's fields (email, full name, etc.)
+        existingUser.setEmail(user.getEmail());
+        existingUser.setName(user.getName());
+        existingUser.setPassword(user.getPassword()); // If password is being updated, it will be already hashed
+        existingUser.setCreatedAt(user.getCreatedAt());
+        // Save the updated user back to the database
+        return userRepository.save(existingUser);
     }
 }

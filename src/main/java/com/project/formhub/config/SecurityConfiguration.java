@@ -48,7 +48,9 @@ public class SecurityConfiguration {
                 "/api/v1/email/**",
                 "/users/**",
                 "/auth/**",
-                "/files"
+                "/files/**",
+                "/survey/*/response",
+                "/project/*/survey/*/question/all"
                 // "/v3/api-docs/**",
                 // "/swagger-ui/**",
                 // "/swagger-ui.html"

@@ -3,6 +3,8 @@ package com.project.formhub.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,6 +32,7 @@ public class Response {
     private long responseId;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "survey_id", nullable = false)
     private Survey survey;
 
