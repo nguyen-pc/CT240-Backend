@@ -12,6 +12,7 @@ public class ChoiceService {
         this.choiceRepository = choiceRepository;
     }
 
+//    get a choice with choiceId
     public Choice getChoice(Long choiceId) {
         Choice dbChoice = this.choiceRepository.findById(choiceId).orElse(null);
         if (dbChoice == null)
