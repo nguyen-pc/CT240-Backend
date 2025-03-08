@@ -4,12 +4,9 @@ import com.project.formhub.domain.Choice;
 import com.project.formhub.domain.Project;
 import com.project.formhub.domain.Question;
 import com.project.formhub.domain.Survey;
-import com.project.formhub.domain.response.QuestionDTO;
-import com.project.formhub.mapper.QuestionMapper;
 import com.project.formhub.repository.QuestionRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +22,7 @@ public class QuestionService {
         this.surveyService = surveyService;
     }
 
-    public Question createQuestion(Long projectId, Long surveyId, Question question) {
+    public void checkParameter(Long projectId, Long surveyId) {
 //        Check if the Project exists
         Optional<Project> dbProject = this.projectService.getProjectById(projectId);
         if (dbProject.isEmpty())
@@ -37,7 +34,11 @@ public class QuestionService {
 //        Check if the Project contains the Survey
         if (projectId != dbSurvey.getProject().getProjectId())
             throw new IllegalArgumentException("Project #" + projectId + " DOES NOT have survey #" + surveyId);
+    }
 
+    public Question createQuestion(Long projectId, Long surveyId, Question question) {
+        checkParameter(projectId, surveyId);
+        Survey dbSurvey = this.surveyService.getSurveyById(surveyId);
 //        check if MULTIPLE_CHOICE or CHECKBOX have not any choice
         if ((question.getQuestionType().isMultipleOrCheckbox()) && question.getChoices() == null)
             throw new IllegalArgumentException("Multiple choice/ Checkbox question could not have empty choices");
@@ -50,37 +51,49 @@ public class QuestionService {
         Question initialQuestion = this.questionRepository.save(question);
         if (initialQuestion == null)
             throw new RuntimeException("init question is WRONG");
+
+//        only create choice if multiple_choice or checkbox question
+        if (question.getQuestionType().isMultipleOrCheckbox()) {
 //        set question for each choice in choices
-        for (Choice choice : choices)
-            choice.setQuestion(initialQuestion);
+            for (Choice choice : choices)
+                choice.setQuestion(initialQuestion);
 
 //        create question with choices
-        initialQuestion.setChoices(choices);
-        Question savedQuestion = this.questionRepository.save(initialQuestion);
-        if (savedQuestion == null) {
-            this.questionRepository.deleteById(initialQuestion.getQuestionId());
-            throw new RuntimeException("create question is WRONG");
+            initialQuestion.setChoices(choices);
+            this.questionRepository.save(initialQuestion);
+            if (initialQuestion == null) {
+                this.questionRepository.deleteById(initialQuestion.getQuestionId());
+                throw new RuntimeException("create question is WRONG");
+            }
         }
-        return savedQuestion;
+        return initialQuestion;
     }
 
-    public QuestionDTO getQuestionDTO(Long questionId) {
-        Optional<Question> question = this.questionRepository.findById(questionId);
-        return question.map(QuestionMapper::toDTO).orElse(null);
+
+    public Question getQuestion(Long projectId, Long surveyId, Long questionId) {
+        checkParameter(projectId, surveyId);
+        Question dbQuestion = this.questionRepository.findById(questionId).orElse(null);
+        if (dbQuestion == null)
+            throw new IllegalArgumentException("Could not find question with id: " + questionId);
+        if (surveyId != dbQuestion.getSurvey().getSurveyId())
+            throw new IllegalArgumentException("Survey: " + surveyId + " DOES NOT CONTAIN question: " + questionId);
+        return dbQuestion;
     }
 
-    public Question getQuestion(Long questionId) {
-        return this.questionRepository.findById(questionId).orElse(null);
-    }
-
-    public void deleteQuestion(Long questionId) {
+    public void deleteQuestion(Long projectId, Long surveyId, Long questionId) {
+        checkParameter(projectId, surveyId);
+        Question dbQuestion = this.questionRepository.findById(questionId).orElse(null);
+        if (dbQuestion == null)
+            throw new IllegalArgumentException("Could not find question with id: " + questionId);
+        if (surveyId != dbQuestion.getSurvey().getSurveyId())
+            throw new IllegalArgumentException("Survey: " + surveyId + " DOES NOT CONTAIN question: " + questionId);
         this.questionRepository.deleteById(questionId);
     }
 
-    public Question updateQuestion(Long questionId, Question resQuestion) {
-        Question dbQuestion = this.getQuestion(questionId);
+    public Question updateQuestion(Long projectId, Long surveyId, Long questionId, Question resQuestion) {
+        Question dbQuestion = this.getQuestion(projectId, surveyId, questionId);
         if (dbQuestion == null) {
-            throw new IllegalArgumentException("Could not find to update question with id: " + questionId);
+            throw new IllegalArgumentException("Could not find question with id: " + questionId);
         }
 
         dbQuestion.setQuestionName(resQuestion.getQuestionName());
@@ -108,23 +121,8 @@ public class QuestionService {
         return this.questionRepository.save(dbQuestion);
     }
 
-    public List<QuestionDTO> getAllQuestionOfSurvey(Long projectId, Long surveyId) {
-//        Check if the Project exists
-        Optional<Project> dbProject = this.projectService.getProjectById(projectId);
-        if (dbProject.isEmpty())
-            throw new IllegalArgumentException("Could not find project with id: " + projectId + " in DB");
-//        Check if the Survey exists
-        Survey dbSurvey = this.surveyService.getSurveyById(surveyId);
-        if (dbSurvey == null)
-            throw new IllegalArgumentException("Could not find survey with id: " + surveyId + " in DB");
-//        Check if the Project contains the Survey
-        if (projectId != dbSurvey.getProject().getProjectId())
-            throw new IllegalArgumentException("Project #" + projectId + " DOES NOT have survey #" + surveyId);
-
-        List<Question> questionList = this.questionRepository.findBySurvey_SurveyId(surveyId);
-        List<QuestionDTO> questionDTOList = new ArrayList<>();
-        for (Question question : questionList)
-            questionDTOList.add(QuestionMapper.toDTO(question));
-        return questionDTOList;
+    public List<Question> getAllQuestionOfSurvey(Long projectId, Long surveyId) {
+        checkParameter(projectId, surveyId);
+        return this.questionRepository.findBySurvey_SurveyId(surveyId);
     }
 }
