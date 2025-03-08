@@ -1,6 +1,7 @@
 package com.project.formhub.controller;
 
 import com.project.formhub.domain.Question;
+import com.project.formhub.domain.response.QuestionDTO;
 import com.project.formhub.service.ProjectService;
 import com.project.formhub.service.QuestionService;
 import com.project.formhub.service.SurveyService;
@@ -44,7 +45,7 @@ public class QuestionController {
             @PathVariable("surveyId") long surveyId,
             @PathVariable("questionId") long questionId) {
         try {
-            Question updatedQuestion = this.questionService.updateQuestion(projectId, surveyId, questionId, resQuestion);
+            Question updatedQuestion = this.questionService.updateQuestion(questionId, resQuestion);
             return ResponseEntity.ok(updatedQuestion);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -55,7 +56,6 @@ public class QuestionController {
 
     // Get a question with id
     @GetMapping("/project/{projectId}/survey/{surveyId}/question/{questionId}")
-
     public ResponseEntity<?> getQuestion(@PathVariable("projectId") long projectId,
             @PathVariable("surveyId") long surveyId,
             @PathVariable("questionId") long questionId) {
@@ -63,13 +63,7 @@ public class QuestionController {
         if (dbQuestion == null)
             return ResponseEntity.badRequest().body("Could not find question with id: " + questionId);
         else
-
             return ResponseEntity.ok(dbQuestion);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Internal error: " + e.getMessage());
-        }
     }
 
     // Delete a question with id
@@ -78,7 +72,7 @@ public class QuestionController {
             @PathVariable("surveyId") long surveyId,
             @PathVariable("questionId") long questionId) {
         try {
-            this.questionService.deleteQuestion(projectId, surveyId, questionId);
+            this.questionService.deleteQuestion(questionId);
             return ResponseEntity.ok("Deleted successfully question with id: " + questionId);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
@@ -89,7 +83,7 @@ public class QuestionController {
     public ResponseEntity<?> getAllQuestionOfSurvey(@PathVariable("projectId") long projectId,
             @PathVariable("surveyId") long surveyId) {
         try {
-            List<Question> questions = this.questionService.getAllQuestionOfSurvey(projectId, surveyId);
+            List<QuestionDTO> questions = this.questionService.getAllQuestionOfSurvey(projectId, surveyId);
             return ResponseEntity.ok(questions);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Internal error: " + e.getMessage());
