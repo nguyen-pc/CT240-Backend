@@ -1,7 +1,6 @@
 package com.project.formhub.controller;
 
 import com.project.formhub.domain.Question;
-import com.project.formhub.domain.response.QuestionDTO;
 import com.project.formhub.service.ProjectService;
 import com.project.formhub.service.QuestionService;
 import com.project.formhub.service.SurveyService;
@@ -27,7 +26,8 @@ public class QuestionController {
     // Create the new question
     @PostMapping("/project/{projectId}/survey/{surveyId}/question")
     public ResponseEntity<?> createQuestion(@PathVariable("projectId") long projectId,
-            @PathVariable("surveyId") long surveyId, @RequestBody Question question) {
+            @PathVariable("surveyId") long surveyId,
+            @RequestBody Question question) {
         try {
             Question createdQuestion = this.questionService.createQuestion(projectId, surveyId, question);
             return ResponseEntity.ok(createdQuestion);
@@ -41,11 +41,11 @@ public class QuestionController {
     // Update a question with idQuestion
     @PutMapping("/project/{projectId}/survey/{surveyId}/question/{questionId}")
     public ResponseEntity<?> updateQuestion(@RequestBody Question resQuestion,
-            @PathVariable("projectId") long projectId,
-            @PathVariable("surveyId") long surveyId,
+            @PathVariable("projectId") long projectId, @PathVariable("surveyId") long surveyId,
             @PathVariable("questionId") long questionId) {
         try {
-            Question updatedQuestion = this.questionService.updateQuestion(questionId, resQuestion);
+            Question updatedQuestion = this.questionService.updateQuestion(projectId, surveyId, questionId,
+                    resQuestion);
             return ResponseEntity.ok(updatedQuestion);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -57,22 +57,23 @@ public class QuestionController {
     // Get a question with id
     @GetMapping("/project/{projectId}/survey/{surveyId}/question/{questionId}")
     public ResponseEntity<?> getQuestion(@PathVariable("projectId") long projectId,
-            @PathVariable("surveyId") long surveyId,
-            @PathVariable("questionId") long questionId) {
-        QuestionDTO dbQuestion = this.questionService.getQuestionDTO(questionId);
-        if (dbQuestion == null)
-            return ResponseEntity.badRequest().body("Could not find question with id: " + questionId);
-        else
+            @PathVariable("surveyId") long surveyId, @PathVariable("questionId") long questionId) {
+        try {
+            Question dbQuestion = this.questionService.getQuestion(projectId, surveyId, questionId);
             return ResponseEntity.ok(dbQuestion);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Internal error: " + e.getMessage());
+        }
     }
 
     // Delete a question with id
     @DeleteMapping("/project/{projectId}/survey/{surveyId}/question/{questionId}")
     public ResponseEntity<?> deleteQuestion(@PathVariable("projectId") long projectId,
-            @PathVariable("surveyId") long surveyId,
-            @PathVariable("questionId") long questionId) {
+            @PathVariable("surveyId") long surveyId, @PathVariable("questionId") long questionId) {
         try {
-            this.questionService.deleteQuestion(questionId);
+            this.questionService.deleteQuestion(projectId, surveyId, questionId);
             return ResponseEntity.ok("Deleted successfully question with id: " + questionId);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
@@ -83,7 +84,7 @@ public class QuestionController {
     public ResponseEntity<?> getAllQuestionOfSurvey(@PathVariable("projectId") long projectId,
             @PathVariable("surveyId") long surveyId) {
         try {
-            List<QuestionDTO> questions = this.questionService.getAllQuestionOfSurvey(projectId, surveyId);
+            List<Question> questions = this.questionService.getAllQuestionOfSurvey(projectId, surveyId);
             return ResponseEntity.ok(questions);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Internal error: " + e.getMessage());
