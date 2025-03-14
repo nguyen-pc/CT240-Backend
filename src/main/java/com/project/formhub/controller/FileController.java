@@ -116,6 +116,7 @@ public class FileController {
 
         // Kiểm tra file có tồn tại trong CSDL không
         File fileRecord = fileService.getFileRecord(fileName, folder);
+        System.out.println(">>>>>>>>>>>>>>>" + fileRecord);
         if (fileRecord == null) {
             throw new StorageException("File not found in database");
         }

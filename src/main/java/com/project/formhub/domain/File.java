@@ -39,7 +39,7 @@ public class File {
     private String createdBy;
     private String updatedBy;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "survey_id")
     private Survey survey;
