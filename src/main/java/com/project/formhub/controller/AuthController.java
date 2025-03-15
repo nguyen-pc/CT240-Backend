@@ -65,7 +65,7 @@ public class AuthController {
 
         if (currentUserDB != null) {
             RestLoginDTO.UserLogin userLogin = new RestLoginDTO.UserLogin(currentUserDB.getId(),
-                    currentUserDB.getEmail(), currentUserDB.getName());
+                    currentUserDB.getEmail(), currentUserDB.getName(), currentUserDB.isRole());
             res.setUser(userLogin);
         }
 
@@ -153,7 +153,7 @@ public class AuthController {
 
         if (currentUserDB != null) {
             RestLoginDTO.UserLogin userLogin = new RestLoginDTO.UserLogin(currentUserDB.getId(),
-                    currentUserDB.getEmail(), currentUserDB.getName());
+                    currentUserDB.getEmail(), currentUserDB.getName(), currentUserDB.isRole());
             res.setUser(userLogin);
         }
 

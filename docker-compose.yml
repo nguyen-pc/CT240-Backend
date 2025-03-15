@@ -1,0 +1,33 @@
+# version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: formhub_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: formhub
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: formhub_app
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/formhub
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      FORMHUB_UPLOAD_FILE_BASE_URI: file:///app/upload/
+      FORMHUB_UPLOAD_FILE_BASE_URL: /app/upload/
+
+volumes:
+  mysql_data:

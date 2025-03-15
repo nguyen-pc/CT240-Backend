@@ -33,6 +33,9 @@ public class User {
     @NotBlank(message = "Password khong duoc de trong")
     private String password;
 
+    @Column(nullable = false)
+    private boolean role;
+
     @Column(columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
 
